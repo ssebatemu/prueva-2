@@ -25,8 +25,8 @@ jobs:
 
     - name: Ejecutar script de automatización
       env:
-        FLOW_USER: ${{ secrets.FLOW_USER }}
-        FLOW_PASS: ${{ secrets.FLOW_PASS }}
+        FLOWUSER: ${{ secrets.FLOWUSER }}
+        FLOWPASS: ${{ secrets.FLOWPAS }}
       run: python actualizar.py
 
     - name: Guardar cambios en el repositorio
