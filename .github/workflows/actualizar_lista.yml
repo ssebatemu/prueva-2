@@ -2,8 +2,8 @@ name: Actualizador Automático de Flow
 
 on:
   workflow_dispatch:
-  # schedule:
-  #   - cron: '0 */6 * * *' # Opcional: cada 6 horas
+  schedule:
+     - cron: '0 */6 * * *' # Opcional: cada 6 horas
 
 jobs:
   actualizar:
