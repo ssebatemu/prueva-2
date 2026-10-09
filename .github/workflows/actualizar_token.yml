@@ -1,4 +1,31 @@
-    - name: Guardar cambios en el repositorio
+ name: Actualizar Token Cada 6 Horas
+
+on:
+  schedule:
+    # Se ejecuta un minuto después de cada hora múltiplo de 6 (00:01, 06:01, 12:01, 18:01 UTC)
+    - cron: '1 */6 * * *'
+  workflow_dispatch: # Permite ejecutarlo manualmente desde GitHub si lo necesitas
+
+permissions:
+  contents: write # Permiso obligatorio para que el bot pueda modificar el archivo txt
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Clonar repositorio
+      uses: actions/checkout@v4
+
+    - name: Configurar Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Ejecutar script de extracción
+      run: python script.py
+
+        - name: Guardar cambios en el repositorio
       run: |
         git config --local user.email "github-actions[bot]@://github.com"
         git config --local user.name "github-actions[bot]"
