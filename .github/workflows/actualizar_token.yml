@@ -20,7 +20,7 @@ jobs:
     - name: Extraer Token de la Web
       run: |
         # Descargar el HTML de la página web
-        curl -s https://jimsa.alwaysdata.net/fl_tok/ > pagina.html
+        curl -s "${{ secrets.URL_FUENTE }}" > pagina.html
         
         # Extraer la URL del token buscando la cadena que empieza con 'https://edge-' hasta el final de la línea
         URL_TOKEN=$(grep -oE "https://edge-[^<\"]+" pagina.html | head -n 1)
