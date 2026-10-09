@@ -1,35 +1,3 @@
-#EXTM3U url-tvg="https://www.open-epg.com/files/argentina.xml,https://www.open-epg.com/files/uruguay.xml,https://www.open-epg.com/files/mexico2.xml,https://www.open-epg.com/files/colombia2.xml,https://www.open-epg.com/files/peru.xml,https://www.open-epg.com/files/paraguay2.xml"
-
-#EXTINF:-1 tvg-id="232408" tvg-name="Telefe.ar" tvg-logo="https://imagenes.gatotv.com/logos/canales/oscuros/telefe_argentina-mediano.png", Telefe.ar
-https://cyberuno.cdn.rcs.net.ar/mnp/yb00000004pgcoaan51zn2w74bzgpszr/output.mpd
-
-
-
-
-
-
-#EXTINF:-1 tvg-id="230937" tvg-name="America.ar" tvg-logo="https://imagenes.gatotv.com/logos/canales/oscuros/america_tv_argentina-mediano.png", America.ar
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=3d7afc43dab940d699b61466b245369f:712b5165ff990156e6c9e580b0b4df59
-https://edge-mix03-bua.cvattv.com.ar:443/tok_eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOiIxNzkxNzA4MzM0Iiwic2lwIjoiMTY4LjE5Ny40Ni4xNTQiLCJwYXRoIjoiLyIsInNlc3Npb25fY2RuX2lkIjoiZjkxZWM0OTk2ZTI2Y2IzMiIsInNlc3Npb25faWQiOiIiLCJjbGllbnRfaWQiOiIiLCJkZXZpY2VfaWQiOiIiLCJtYXhfc2Vzc2lvbnMiOjAsInNlc3Npb25fZHVyYXRpb24iOjAsInVybCI6Imh0dHBzOi8vMTgxLjEyLjM2LjE1MCIsImF1ZCI6IjMyNSIsInNvdXJjZXMiOls3NSw4OF19.uVeS9_yEVn0iZJXLdi2RgV5bVY5ZGm_FaZ5_9SrSLo_LTkLuQ6lLYMOGBP5NZc2U9FHb97-9E-siexzGBQ1UFA==/live/c3eds/AmericaTV/SA_Live_dash_enc/AmericaTV.mpd|Origin=https://portal.app.flow.com.ar&Referer=https://portal.app.flow.com.ar/
-
-
-#EXTINF:-1 tvg-id="230938" tvg-name="TVPublica.ar" tvg-logo="https://imagenes.gatotv.com/logos/canales/oscuros/television_publica_argentina-mediano.png", TVPublica.ar
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=589f5b6f4afec0b3362cd6be2ab1eb36:6d685f3151730ca6a4be7765a46d30a5
-https://edge-mix03-bua.cvattv.com.ar:443/tok_eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOiIxNzkxNzA4MzM0Iiwic2lwIjoiMTY4LjE5Ny40Ni4xNTQiLCJwYXRoIjoiLyIsInNlc3Npb25fY2RuX2lkIjoiZjkxZWM0OTk2ZTI2Y2IzMiIsInNlc3Npb25faWQiOiIiLCJjbGllbnRfaWQiOiIiLCJkZXZpY2VfaWQiOiIiLCJtYXhfc2Vzc2lvbnMiOjAsInNlc3Npb25fZHVyYXRpb24iOjAsInVybCI6Imh0dHBzOi8vMTgxLjEyLjM2LjE1MCIsImF1ZCI6IjMyNSIsInNvdXJjZXMiOls3NSw4OF19.uVeS9_yEVn0iZJXLdi2RgV5bVY5ZGm_FaZ5_9SrSLo_LTkLuQ6lLYMOGBP5NZc2U9FHb97-9E-siexzGBQ1UFA==/live/c6eds/Canal7/SA_Live_dash_enc_wl/Canal7.mpd|Origin=https://portal.app.flow.com.ar&Referer=https://portal.app.flow.com.ar/
-
-
-#EXTINF:-1 tvg-id="232330" tvg-name="El Nueve.ar" tvg-logo="https://imagenes.gatotv.com/logos/canales/oscuros/9_de_argentina-mediano.png", El Nueve.ar
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=3ddf62bf44e68f06a6adb810199df713:2ace15b4ffbe70940fdf04cf97e114e7
-https://edge-mix03-bua.cvattv.com.ar:443/tok_eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOiIxNzkxNzA4MzM0Iiwic2lwIjoiMTY4LjE5Ny40Ni4xNTQiLCJwYXRoIjoiLyIsInNlc3Npb25fY2RuX2lkIjoiZjkxZWM0OTk2ZTI2Y2IzMiIsInNlc3Npb25faWQiOiIiLCJjbGllbnRfaWQiOiIiLCJkZXZpY2VfaWQiOiIiLCJtYXhfc2Vzc2lvbnMiOjAsInNlc3Npb25fZHVyYXRpb24iOjAsInVybCI6Imh0dHBzOi8vMTgxLjEyLjM2LjE1MCIsImF1ZCI6IjMyNSIsInNvdXJjZXMiOls3NSw4OF19.uVeS9_yEVn0iZJXLdi2RgV5bVY5ZGm_FaZ5_9SrSLo_LTkLuQ6lLYMOGBP5NZc2U9FHb97-9E-siexzGBQ1UFA==/live/c3eds/Canal9/SA_Live_dash_enc/Canal9.mpd|Origin=https://portal.app.flow.com.ar&Referer=https://portal.app.flow.com.ar/
-
-
-#EXTINF:-1 tvg-id="232408" tvg-name="Telefe.ar" tvg-logo="https://imagenes.gatotv.com/logos/canales/oscuros/telefe_argentina-mediano.png", Telefe.ar
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=69d08ad795092fc59dbdfb194424dd92:a73948b44e9292eede50c0c654301860
-https://edge-mix03-bua.cvattv.com.ar:443/tok_eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOiIxNzkxNzA4MzM0Iiwic2lwIjoiMTY4LjE5Ny40Ni4xNTQiLCJwYXRoIjoiLyIsInNlc3Npb25fY2RuX2lkIjoiZjkxZWM0OTk2ZTI2Y2IzMiIsInNlc3Npb25faWQiOiIiLCJjbGllbnRfaWQiOiIiLCJkZXZpY2VfaWQiOiIiLCJtYXhfc2Vzc2lvbnMiOjAsInNlc3Npb25fZHVyYXRpb24iOjAsInVybCI6Imh0dHBzOi8vMTgxLjEyLjM2LjE1MCIsImF1ZCI6IjMyNSIsInNvdXJjZXMiOls3NSw4OF19.uVeS9_yEVn0iZJXLdi2RgV5bVY5ZGm_FaZ5_9SrSLo_LTkLuQ6lLYMOGBP5NZc2U9FHb97-9E-siexzGBQ1UFA==/live/c6eds/TelefeHD/SA_Live_dash_enc_wl/TelefeHD.mpd|Origin=https://portal.app.flow.com.ar&Referer=https://portal.app.flow.com.ar/
 
 
 #EXTINF:-1 tvg-id="232332" tvg-name="El Trece.ar" tvg-logo="https://imagenes.gatotv.com/logos/canales/oscuros/13_de_argentina-mediano.png", El Trece.ar
