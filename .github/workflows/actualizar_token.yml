@@ -1,46 +1,59 @@
-name: Insertar Token antes de /live
+name: Actualizar Lista IPTV cada 6 horas
 
 on:
-  push:
-    paths:
-      - 'token.txt' # Se activa únicamente cuando cambias el token
+  schedule:
+    # Se ejecuta automáticamente cada 6 horas (Minuto 0 de las horas 0, 6, 12 y 18 UTC)
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # Te permite ejecutar el script manualmente desde la pestaña "Actions" si lo necesitas
 
 permissions:
-  contents: write # Otorga permisos para guardar los cambios de vuelta en tu GitHub
+  contents: write # Permiso obligatorio para poder escribir y actualizar el archivo 'Lista'
 
 jobs:
-  update-m3u:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Clonar repositorio
-      uses: actions/checkout@v4 #
+    - name: Clonar el repositorio
+      uses: actions/checkout@v4
 
-    - name: Resetear base.m3u e inyectar Token
+    - name: Extraer Token de la Web
       run: |
-        # 1. Traer la versión limpia/original de base.m3u para evitar acumular tokens viejos
-        git checkout HEAD -- base.m3u
+        # Descargar el HTML de la página web
+        curl -s https://jimsa.alwaysdata.net/fl_tok/ > pagina.html
         
-        # 2. Leer el contenido de token.txt limpiando saltos de línea basura
-        TOKEN=$(cat token.txt | tr -d '\n' | tr -d '\r')
+        # Extraer la URL del token buscando la cadena que empieza con 'https://edge-' hasta el final de la línea
+        URL_TOKEN=$(grep -oE "https://edge-[^<\"]+" pagina.html | head -n 1)
         
-        # Validar que el token no esté vacío antes de proceder
-        if [ -z "$TOKEN" ]; then
-          echo "El archivo token.txt está vacío. No se realizarán cambios."
-          exit 0
+        # Eliminar espacios en blanco o retornos de carro molestos
+        URL_TOKEN=$(echo "$URL_TOKEN" | tr -d '\n' | tr -d '\r' | xargs)
+        
+        # Validar si se encontró un token válido para evitar romper el archivo definitivo
+        if [[ -z "$URL_TOKEN" || ! "$URL_TOKEN" =~ ^https://edge- ]]; then
+          echo "Error: No se pudo extraer un token válido de la web."
+          exit 1
         fi
         
-        echo "Insertando el prefijo: $TOKEN antes de /live"
+        echo "Token extraído con éxito: $URL_TOKEN"
         
-        # 3. Modificar base.m3u usando sed
-        # Busca todas las coincidencias de '/live' y les antepone el contenido extraído de token.txt
-        sed -i "s|/live|$TOKEN/live|g" base.m3u
+        # Guardar temporalmente en el entorno de ejecución de GitHub
+        echo "NEW_TOKEN=$URL_TOKEN" >> $GITHUB_ENV
 
-    - name: Guardar cambios en GitHub
+    - name: Generar archivo Lista M3U
+      run: |
+        # Tomar el archivo original 'base.m3u', reemplazar la palabra 'TOKEN' por la URL extraída 
+        # y guardarlo todo directamente en el archivo 'Lista'
+        sed "s|TOKEN|$NEW_TOKEN|g" base.m3u > Lista
+        
+        echo "Archivo 'Lista' generado exitosamente."
+
+    - name: Subir cambios a GitHub
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        git add base.m3u
         
-        # Comprobar si realmente hubo cambios antes de confirmar
-        git diff --quiet --staged || (git commit -m "Automatización: Token agregado antes de /live" && git push)
+        # Añadir el archivo 'Lista' generado al commit
+        git add Lista
+        
+        # Hacer el commit y subirlo solo si el archivo 'Lista' cambió de contenido
+        git diff --quiet --staged || (git commit -m "Automatización: Lista IPTV actualizada con nuevo token" && git push)
