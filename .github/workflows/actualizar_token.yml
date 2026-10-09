@@ -2,12 +2,14 @@ name: Actualizar Lista IPTV cada 6 horas
 
 on:
   schedule:
-    # Se ejecuta automáticamente cada 6 horas (Minuto 0 de las horas 0, 6, 12 y 18 UTC)
     - cron: '0 */6 * * *'
-  workflow_dispatch: # Te permite ejecutar el script manualmente desde la pestaña "Actions" si lo necesitas
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 permissions:
-  contents: write # Permiso obligatorio para poder escribir y actualizar el archivo 'Lista'
+  contents: write
 
 jobs:
   build:
@@ -17,43 +19,36 @@ jobs:
     - name: Clonar el repositorio
       uses: actions/checkout@v4
 
-    - name: Extraer Token de la Web
+    - name: Extraer Token de la Web Protegida
       run: |
-        # Descargar el HTML de la página web
+        # Descargar el HTML usando el Secreto oculto de GitHub
         curl -s "${{ secrets.URL_FUENTE }}" > pagina.html
         
-        # Extraer la URL del token buscando la cadena que empieza con 'https://edge-' hasta el final de la línea
+        # Extraer la URL del token buscando la cadena que empieza con 'https://edge-'
         URL_TOKEN=$(grep -oE "https://edge-[^<\"]+" pagina.html | head -n 1)
         
-        # Eliminar espacios en blanco o retornos de carro molestos
+        # Limpiar espacios en blanco o retornos de carro molestos
         URL_TOKEN=$(echo "$URL_TOKEN" | tr -d '\n' | tr -d '\r' | xargs)
         
-        # Validar si se encontró un token válido para evitar romper el archivo definitivo
+        # Validar si se encontró un token válido
         if [[ -z "$URL_TOKEN" || ! "$URL_TOKEN" =~ ^https://edge- ]]; then
-          echo "Error: No se pudo extraer un token válido de la web."
+          echo "Error: No se pudo extraer un token válido."
           exit 1
         fi
         
-        echo "Token extraído con éxito: $URL_TOKEN"
-        
-        # Guardar temporalmente en el entorno de ejecución de GitHub
+        # Registramos la variable de forma segura en el entorno
         echo "NEW_TOKEN=$URL_TOKEN" >> $GITHUB_ENV
 
     - name: Generar archivo Lista M3U
       run: |
-        # Tomar el archivo original 'base.m3u', reemplazar la palabra 'TOKEN' por la URL extraída 
-        # y guardarlo todo directamente en el archivo 'Lista'
+        # Reemplazar 'TOKEN' por la URL extraída y volcarlo en 'Lista'
         sed "s|TOKEN|$NEW_TOKEN|g" base.m3u > Lista
-        
         echo "Archivo 'Lista' generado exitosamente."
 
     - name: Subir cambios a GitHub
       run: |
-        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.email "github-actions[bot]@://github.com"
         git config --local user.name "github-actions[bot]"
         
-        # Añadir el archivo 'Lista' generado al commit
         git add Lista
-        
-        # Hacer el commit y subirlo solo si el archivo 'Lista' cambió de contenido
         git diff --quiet --staged || (git commit -m "Automatización: Lista IPTV actualizada con nuevo token" && git push)
