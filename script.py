@@ -2,7 +2,7 @@ import re
 import urllib.request
 
 # CAMBIO CLAVE: Se añade la 's' a https:// para ingresar a la web correcta
-url_pagina = "https://alwaysdata.net"
+url_pagina = "https://jimsa.alwaysdata.net/fl_tok/"
 
 try:
     print("Conectando con la página segura...")
