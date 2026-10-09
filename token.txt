@@ -1,1 +1,1 @@
-Error: No se encontró el token en la página web.
+Error: Estructura de la página no reconocida o modificada.
