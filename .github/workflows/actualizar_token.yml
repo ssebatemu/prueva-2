@@ -17,9 +17,9 @@ jobs:
     - name: Clonar el repositorio
       uses: actions/checkout@v4
 
-     - name: Extraer Token de la Web Protegida
-      run: |
-        # Descargar el HTML usando el Secreto oculto de GitHub
+    - name: Extraer Token de la Web Protegida
+    run: |
+      # Descargar el HTML usando el Secreto oculto de GitHub
         curl -s "${{ secrets.URL_FUENTE }}" > pagina.html
 
         
