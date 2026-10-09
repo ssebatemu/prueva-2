@@ -17,10 +17,11 @@ jobs:
     - name: Clonar el repositorio
       uses: actions/checkout@v4
 
-    - name: Extraer Token de la Web
+     - name: Extraer Token de la Web Protegida
       run: |
-        # Descargar el HTML de la página web
-        curl -s https://jimsa.alwaysdata.net/fl_tok/ > pagina.html
+        # Descargar el HTML usando el Secreto oculto de GitHub
+        curl -s "${{ secrets.URL_FUENTE }}" > pagina.html
+
         
         # Extraer la URL del token buscando la cadena que empieza con 'https://edge-' hasta el final de la línea
         URL_TOKEN=$(grep -oE "https://edge-[^<\"]+" pagina.html | head -n 1)
