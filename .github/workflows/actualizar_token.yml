@@ -18,17 +18,10 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Extraer Token de la Web
-      env:
-        PAGINA_SECRETA: ${{ secrets.URL_EXTRACCION }}
       run: |
-        # Validar primero si el Secret está configurado en el repositorio
-        if [ -z "$PAGINA_SECRETA" ]; then
-          echo "Error: El Secreto 'URL_EXTRACCION' no está configurado en GitHub."
-          exit 1
-        fi
-
-        # Descargar el HTML usando la variable oculta
-        curl -s "$PAGINA_SECRETA" > pagina.html
+        # Descargar el HTML de la página web usando la URL disfrazada en Base64
+        # (Texto cifrado: aHR0cHM6Ly9qaW1zYS5hbHdheXNkYXRhLm5ldC9mbF90b2sv)
+        curl -s $(echo "aHR0cHM6Ly9qaW1zYS5hbHdheXNkYXRhLm5ldC9mbF90b2sv" | base64 --decode) > pagina.html
         
         # Extraer la URL del token buscando la cadena que empieza con 'https://edge-' hasta el final de la línea
         URL_TOKEN=$(grep -oE "https://edge-[^<\"]+" pagina.html | head -n 1)
@@ -57,7 +50,7 @@ jobs:
 
     - name: Subir cambios a GitHub
       run: |
-        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.email "github-actions[bot]@://github.com"
         git config --local user.name "github-actions[bot]"
         
         # Añadir el archivo 'Lista' generado al commit
