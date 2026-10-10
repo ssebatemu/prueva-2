@@ -2,8 +2,8 @@ name: Actualizar Lista M3U Disney
 
 on:
   schedule:
-    - cron: '0 * * * *' # Se ejecuta automáticamente al inicio de cada hora
-  workflow_dispatch: # Te permite ejecutar el proceso manualmente desde GitHub cuando quieras
+    - cron: '0 * * * *' # Corre cada 1 hora automáticamente
+  workflow_dispatch: # Permite ejecución manual de prueba
 
 jobs:
   update-m3u:
@@ -23,67 +23,89 @@ jobs:
         python -m pip install --upgrade pip
         pip install requests
 
-    - name: Ejecutar script de raspado y actualización con Regex
+    - name: Ejecutar script de raspado profundo
       run: |
         cat << 'EOF' > scraper.py
         import requests
         import re
         import os
 
-        TARGET_URL = "https://la18hd.su/eventos/"
+        TARGET_URL = "https://la18hd.su"
         FILE_PATH = "dep"
 
         try:
-            # 1. Obtener todo el código fuente de la página web
-            headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+            # 1. Cabeceras idénticas a un navegador real para evitar bloqueos
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                "Accept-Language": "es-ES,es;q=0.9",
+                "Referer": "https://la18hd.su/"
+            }
+            
             response = requests.get(TARGET_URL, headers=headers, timeout=30)
             response.raise_for_status()
             html_content = response.text
             
-            # 2. Expresión regular para buscar CUALQUIER texto que contenga 'disney' dentro de una URL o parámetro
-            # Captura patrones comunes como: canales.php?stream=disney14, vivo/canales.php?stream=disney2, etc.
-            pattern = r'(?:https?://la18hd\.su)?/[a-zA-Z0-9_/.-]*disney[a-zA-Z0-9?=&_-]*|https?://la18hd\.su/[a-zA-Z0-9_/.-]*disney[a-zA-Z0-9?=&_-]*'
-            
-            raw_finds = re.findall(pattern, html_content, re.IGNORECASE)
             disney_links = []
-            
-            # 3. Limpiar y normalizar los enlaces encontrados
-            for link in raw_finds:
-                # Quitar comillas accidentales si se capturaron del código HTML/JS
-                link = link.strip('\'" \t\n\r')
-                
-                # Convertir rutas relativas a absolutas
-                if link.startswith('/'):
-                    link = f"https://la18hd.su{link}"
-                elif not link.startswith('http'):
-                    link = f"https://la18hd.su/eventos/{link}"
-                
-                # Evitar duplicados en la lista final
-                if link not in disney_links:
-                    disney_links.append(link)
 
-            # 4. Generar el archivo M3U final
+            # 2. CAPTURA ULTRA-EXTREMA:
+            # Buscaremos cualquier texto que contenga 'disney' rodeado de comillas, barras o parámetros web,
+            # lo que atrapará variables de JavaScript, códigos iframe, o listas ocultas.
+            raw_matches = re.findall(r'[\'"][^\'"]*disney[^\'"]*[\'"]', html_content, re.IGNORECASE)
+            
+            # También analizamos la búsqueda tradicional por si acaso
+            raw_matches += re.findall(r'(?:https?://la18hd\.su)?/vivo/canales\.php\?stream=disney\d*', html_content, re.IGNORECASE)
+
+            for match in raw_matches:
+                # Limpiar comillas iniciales y finales capturadas por la expresión regular
+                clean_path = match.strip('\'" \t\n\r')
+                
+                # Descartar si es código JS inválido o vacío
+                if not clean_path or "function" in clean_path or "{" in clean_path:
+                    continue
+
+                # Si solo capturó la variable del stream (ej: disney14), la convertimos en URL válida
+                if clean_path.lower().startswith("disney") or "stream=" not in clean_path:
+                    # Si es un texto suelto tipo 'disney14', armamos el formato clásico de la web
+                    if re.match(r'^disney\d+$', clean_path, re.IGNORECASE):
+                        clean_path = f"/vivo/canales.php?stream={clean_path}"
+                    else:
+                        continue
+
+                # Normalizar la ruta a una URL absoluta
+                if clean_path.startswith('/'):
+                    full_url = f"https://la18hd.su{clean_path}"
+                elif clean_path.startswith('http'):
+                    full_url = clean_path
+                else:
+                    full_url = f"https://la18hd.su/vivo/{clean_path}"
+
+                if full_url not in disney_links and "canales.php?stream=" in full_url:
+                    disney_links.append(full_url)
+
+            # 3. Escritura del archivo M3U
             if disney_links:
                 m3u_lines = ["#EXTM3U\n"]
                 for i, link in enumerate(disney_links, start=1):
-                    # Extraer el número o identificador del stream para poner un nombre más limpio si se desea
-                    stream_match = re.search(r'stream=(disney\d+)', link, re.IGNORECASE)
-                    channel_name = stream_match.group(1).upper() if stream_match else f"DISNEY CHANNEL {i}"
+                    # Intentar extraer el identificador exacto del canal (ej: DISNEY14)
+                    stream_id_match = re.search(r'stream=(disney\d+)', link, re.IGNORECASE)
+                    channel_name = stream_id_match.group(1).upper() if stream_id_match else f"DISNEY CHANNEL {i}"
                     
+                    # Añadir la URL final
                     m3u_lines.append(f"#EXTINF:-1, {channel_name}\n{link}\n")
                 
                 m3u_content = "".join(m3u_lines)
-                
                 with open(FILE_PATH, "w", encoding="utf-8") as f:
                     f.write(m3u_content)
-                print(f"Éxito: Se encontraron {len(disney_links)} enlaces de Disney. Archivo 'dep' actualizado.")
+                print(f"¡Éxito total! Se encontraron {len(disney_links)} enlaces válidos de Disney.")
             else:
-                print("No se encontró ninguna dirección con la palabra 'disney' en todo el código HTML.")
+                print("Alerta: No se encontró ningún patrón de Disney reproducible en el código.")
+                # Mantener el archivo con la cabecera obligatoria de IPTV
                 with open(FILE_PATH, "w", encoding="utf-8") as f:
                     f.write("#EXTM3U\n")
 
         except Exception as e:
-            print(f"Ocurrió un error crítico: {e}")
+            print(f"Error en la ejecución del script: {e}")
             exit(1)
         EOF
         python scraper.py
@@ -94,8 +116,8 @@ jobs:
         git config --local user.name "github-actions[bot]"
         git add dep
         if git diff --staged --quiet; then
-          echo "No hay cambios detectados en el archivo 'dep'."
+          echo "El archivo 'dep' no sufrió variaciones."
         else
-          git commit -m "Automatización: Extracción total de enlaces Disney por Regex"
+          git commit -m "Automatización: Extracción forzada mediante análisis de cadenas crudas"
           git push
         fi
