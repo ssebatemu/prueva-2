@@ -21,59 +21,69 @@ jobs:
     - name: Instalar dependencias
       run: |
         python -m pip install --upgrade pip
-        pip install requests beautifulsoup4
+        pip install requests
 
-    - name: Ejecutar script de raspado y actualización
+    - name: Ejecutar script de raspado y actualización con Regex
       run: |
         cat << 'EOF' > scraper.py
         import requests
-        from bs4 import BeautifulSoup
+        import re
         import os
 
         TARGET_URL = "https://la18hd.su/eventos/"
-        FILE_PATH = "dep" # El archivo 'dep' se ubica en la raíz del repositorio
+        FILE_PATH = "dep"
 
         try:
-            # 1. Obtener el contenido de la página web
-            headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+            # 1. Obtener todo el código fuente de la página web
+            headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
             response = requests.get(TARGET_URL, headers=headers, timeout=30)
             response.raise_for_status()
+            html_content = response.text
             
-            # 2. Parsear el HTML y buscar enlaces con la palabra 'disney'
-            soup = BeautifulSoup(response.text, 'html.parser')
+            # 2. Expresión regular para buscar CUALQUIER texto que contenga 'disney' dentro de una URL o parámetro
+            # Captura patrones comunes como: canales.php?stream=disney14, vivo/canales.php?stream=disney2, etc.
+            pattern = r'(?:https?://la18hd\.su)?/[a-zA-Z0-9_/.-]*disney[a-zA-Z0-9?=&_-]*|https?://la18hd\.su/[a-zA-Z0-9_/.-]*disney[a-zA-Z0-9?=&_-]*'
+            
+            raw_finds = re.findall(pattern, html_content, re.IGNORECASE)
             disney_links = []
             
-            for a_tag in soup.find_all('a', href=True):
-                href = a_tag['href']
-                # Filtrar enlaces que contengan 'disney' ignorando mayúsculas/minúsculas
-                if 'disney' in href.lower():
-                    # Resolver URLs relativas en absolutas
-                    if href.startswith('/'):
-                        href = f"https://la18hd.su{href}"
-                    elif not href.startswith('http'):
-                        href = f"https://la18hd.su/eventos/{href}"
-                    
-                    if href not in disney_links:
-                        disney_links.append(href)
+            # 3. Limpiar y normalizar los enlaces encontrados
+            for link in raw_finds:
+                # Quitar comillas accidentales si se capturaron del código HTML/JS
+                link = link.strip('\'" \t\n\r')
+                
+                # Convertir rutas relativas a absolutas
+                if link.startswith('/'):
+                    link = f"https://la18hd.su{link}"
+                elif not link.startswith('http'):
+                    link = f"https://la18hd.su/eventos/{link}"
+                
+                # Evitar duplicados en la lista final
+                if link not in disney_links:
+                    disney_links.append(link)
 
-            # 3. Generar el contenido en formato M3U para IPTV
+            # 4. Generar el archivo M3U final
             if disney_links:
                 m3u_lines = ["#EXTM3U\n"]
                 for i, link in enumerate(disney_links, start=1):
-                    m3u_lines.append(f"#EXTINF:-1,Disney Channel {i}\n{link}\n")
+                    # Extraer el número o identificador del stream para poner un nombre más limpio si se desea
+                    stream_match = re.search(r'stream=(disney\d+)', link, re.IGNORECASE)
+                    channel_name = stream_match.group(1).upper() if stream_match else f"DISNEY CHANNEL {i}"
+                    
+                    m3u_lines.append(f"#EXTINF:-1, {channel_name}\n{link}\n")
+                
                 m3u_content = "".join(m3u_lines)
                 
-                # 4. Escribir el resultado en el archivo 'dep'
                 with open(FILE_PATH, "w", encoding="utf-8") as f:
                     f.write(m3u_content)
-                print(f"Se encontraron {len(disney_links)} enlaces de Disney. Archivo 'dep' actualizado.")
+                print(f"Éxito: Se encontraron {len(disney_links)} enlaces de Disney. Archivo 'dep' actualizado.")
             else:
-                print("No se encontraron enlaces con la palabra 'disney'.")
+                print("No se encontró ninguna dirección con la palabra 'disney' en todo el código HTML.")
                 with open(FILE_PATH, "w", encoding="utf-8") as f:
                     f.write("#EXTM3U\n")
 
         except Exception as e:
-            print(f"Ocurrió un error durante la ejecución: {e}")
+            print(f"Ocurrió un error crítico: {e}")
             exit(1)
         EOF
         python scraper.py
@@ -86,6 +96,6 @@ jobs:
         if git diff --staged --quiet; then
           echo "No hay cambios detectados en el archivo 'dep'."
         else
-          git commit -m "Automatización: Actualización por hora de enlaces Disney en M3U"
+          git commit -m "Automatización: Extracción total de enlaces Disney por Regex"
           git push
         fi
